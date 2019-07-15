@@ -62,31 +62,95 @@ contacts.map(contact => {
     })
 });
 
-console.log('Users map: ',users);
+console.log('Users map: ', users);
 
 users.forEach(val => {
     val.brand.map(carBrand => {
         uniqueCarsSet.add(carBrand)
     })
 });
-console.log('Unique cars: ',[...uniqueCarsSet]);
+console.log('Unique cars: ', [...uniqueCarsSet]);
 
 users.forEach(val => {
     val.phones.map(phoneNumber => {
         mobileOperatorsSet.add(phoneNumber.slice(0, 5))
     })
 });
-console.log('Mobile operators: ',mobileOperatorsSet);
+console.log('Mobile operators: ', mobileOperatorsSet);
 
 mobileOperatorsSet.forEach(operator => {
     groupedUsersByMobileOperator[operator] = [];
     users.forEach(user => {
         user.phones.forEach(phoneNumber => {
             if (phoneNumber.slice(0, 5) === operator) {
-                groupedUsersByMobileOperator[operator][groupedUsersByMobileOperator[operator].length] = user
+                groupedUsersByMobileOperator[operator].push(user)
             }
         })
     })
 });
 
-console.log('Users grouped by mobile operators: ',groupedUsersByMobileOperator);
+console.log('Users grouped by mobile operators: ', groupedUsersByMobileOperator);
+
+// using REDUCE
+
+let usersReduce = new Map();
+let uniqueCarsSetReduce = new Set();
+let mobileOperatorsSetReduce = new Set();
+let groupedUsersByMobileOperatorReduce = {};
+
+contacts.reduce((acc, curr) =>  acc.set(curr.user, {
+            'brand': curr.brand,
+            'phones': curr.phones
+        }), usersReduce);
+
+console.log('Users map (using REDUCE): ', usersReduce);
+
+usersReduce.forEach(val => {
+    val.brand.reduce((acc, curr) => acc.add(curr), uniqueCarsSetReduce)
+});
+
+console.log('Unique cars (using REDUCE): ', [...uniqueCarsSetReduce]);
+
+usersReduce.forEach(user => {
+    user.phones.reduce((acc, curr) => acc.add(curr.slice(0, 5)), mobileOperatorsSetReduce)
+});
+console.log('Mobile operators (using REDUCE): ', mobileOperatorsSetReduce);
+
+// mobileOperatorsSetReduce.forEach(operator => {
+//     groupedUsersByMobileOperatorReduce[operator] = [];
+//     usersReduce.forEach(user => {
+//         user.phones.reduce((acc, curr) => {
+//             if (curr.slice(0, 5) === operator) {
+//                 acc.push(user)
+//             }
+//         }, groupedUsersByMobileOperatorReduce[operator])
+//     })
+// });
+
+// console.log('Users grouped by mobile operators (using REDUCE): ', groupedUsersByMobileOperatorReduce);
+
+// не ПОВНІСТЮ працює з reduce. Для останнього "оператора" каже, що "acc" - undefined.
+
+//------------------------------------------
+
+function getUserByPhoneNumber(num) {
+    let matchedUserObject = {};
+    contacts.map(contact =>  {
+        if (contact.phones[0].includes(num)) {
+            matchedUserObject[contact.user] = contact
+        }
+    });    
+    return matchedUserObject
+};
+
+console.log('Users with matched phone number to "456" - ',getUserByPhoneNumber(456));
+
+const allCars = contacts.reduce((acc, curr) => [...acc, ...curr.brand], []);
+function uniqueCars() {
+    let carsSet = new Set();
+    allCars.map(car => carsSet.add(car));
+    return [...carsSet]
+}
+
+console.log('All cars: ',allCars);
+console.log('Unique cars: ', uniqueCars());
